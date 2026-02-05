@@ -23,7 +23,7 @@
 // private
 // view & pure functions
 
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 // We gonna be very verbose with our code documentation from now on. It is when security professionals reviewing these code when we have ton of texts of explaining what we are doing. And we can debug our issues through AI such verbose documentation would help much more lot than doing nothing to it.
 
@@ -48,7 +48,7 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
     error DecentralizedStableCoin__BurnAmountExceedsBalance();
     error DecentralizedStableCoin__NotZeroAddress();
 
-    constructor() ERC20("DecentralizedStableCoin", "DSC") {}
+    constructor() ERC20("DecentralizedStableCoin", "DSC") Ownable(msg.sender) {}
 
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
