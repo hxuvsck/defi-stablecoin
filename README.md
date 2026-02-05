@@ -1,66 +1,20 @@
-## Foundry
+# 1. What we will be doing during this course:
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+We will be making a stable-coin where it has these features during our stable-coin course period:
 
-Foundry consists of:
+1. Relative Stability: Anchored / Pegged to 1.00$ (USD). / Coded to be always stable coin is always worth 1$ /
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- Getting price feed through Chainlink.
+- Will set a function to exchange ETH & BTC for worth of their $ price is.
+-
 
-## Documentation
+2. Stability Mechanism (Minting): Algorithmic (Decentralized, means there is no centralized entity to mint or burn maintain the price).
+<!-- Future of stable coins will be algorithmic, but a better stablecoin for Web3 probably is an anchored or pegged contemporarily. It's may probably floating, but that's a much harder mechanism to do. -->
 
-https://book.getfoundry.sh/
+- People can only mint the stablecoin with enough collateral. / Will be coded directly into our protocol.
 
-## Usage
+3. Collateral Type: Exogenous (Crypto Collateral: Use cryptocurrencies as collateral for this currency).
 
-### Build
+Which will be using wBTC (wrapped Bitcoin which is ERC20 version of BTC), wETH (wrapped Ethereum which is ERC20 version of ETH.) for our collateral system.
 
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+<!-- Some might argue that this wBTC is a little bit centralized depending on who is onboarding the Bitcoin to Ethereum, but that's not quite important for this. (Keep in mind)-->
