@@ -1,0 +1,3 @@
+
+npm run test:generation
+npx lint-staged
