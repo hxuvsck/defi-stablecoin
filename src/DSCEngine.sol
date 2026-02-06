@@ -46,8 +46,26 @@ contract DSCEngine {
     function despositCollateralAndMintDsc() external {}
 
     function redeemCollateralForDsc() external {}
+    
+    // Threshold to let's say 150%
+    // $100 ETH -> $75 ETH
+    // $50  DSC
+
+    // Hey, if someone pays back your minted DSC, they can have all your collateral for a discount. 
+    // Ломбардны систем шиг, хэрэв оруулсан хөрөнгийн хэмжээ тухайн зээлдүүлсэн хэмжээний хувьчлалаас хэтэрвэл өөр хэрэглэгч тухайн зээлдүүлсэн хөрөнгийг өмнөөс нь төлөн оруулсан хөрөнгийг авч, ашиг хийх процесс яригдав.
+
+    /**
+     * @notice People do actually start testing so early within core concepts of any functions and operations of the smartcontracts right away...
+     */
+    function depositCollateral() external {}
+
+    function redeemCollateral() external {}
+
+    function mintDsc() external {}
 
     function burnDsc() external {}
 
     function liquidate() external {}
+
+    function getHealthFactor() external view {}
 }
