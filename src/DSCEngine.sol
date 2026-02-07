@@ -5,7 +5,7 @@ pragma solidity ^0.8.18;
 // version
 // imports
 // interfaces, libraries, contracts
-// errors
+// Errors
 // Type declarations
 // State variables
 // Events
@@ -43,6 +43,47 @@ import {} from "";
  */
 
 contract DSCEngine {
+
+    
+    //////////////////////////
+    ///// Errors         /////
+    //////////////////////////
+
+    error DSCEngine__NeedsMoreThanZero();
+
+    
+    //////////////////////////////
+    ///// State Vars         /////
+    //////////////////////////////
+
+    mapping(address token=>address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
+
+    //////////////////////////
+    ///// Modifiers      /////
+    //////////////////////////
+
+    modifier moreThanZero(uint256 amount) {
+        if(amount == 0){
+            revert DSCEngine__NeedsMoreThanZero();
+        }
+        _;
+    }
+
+    modifier isAllowedToken(address token) {
+        // If token is not allowed, reverts
+    }
+
+    //////////////////////////
+    ///// Functions      /////
+    //////////////////////////
+
+    constructor() {}
+
+
+    ///////////////////////////////////
+    ///// External Functions      /////
+    ///////////////////////////////////
+
     function despositCollateralAndMintDsc() external {}
 
     function redeemCollateralForDsc() external {}
@@ -57,7 +98,13 @@ contract DSCEngine {
     /**
      * @notice People do actually start testing so early within core concepts of any functions and operations of the smartcontracts right away...
      */
-    function depositCollateral() external {}
+    /**
+     * @param tokenCollateralAddress The address of the token to deposit as collateral
+     * @param amountCollateral The amount of collateral to deposit
+     */
+    function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral) external moreThanZero(amountCollateral) {
+
+    }
 
     function redeemCollateral() external {}
 
