@@ -50,6 +50,7 @@ contract DSCEngine {
     //////////////////////////
 
     error DSCEngine__NeedsMoreThanZero();
+    error DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 
     
     //////////////////////////////
@@ -77,7 +78,16 @@ contract DSCEngine {
     ///// Functions      /////
     //////////////////////////
 
-    constructor() {}
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+        // Every price feed that using will be USD backed.
+        if(tokenAddresses.length != priceFeedAddresses.length)
+        revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+        // e.g => ETH/USD, BTH/USD, MKR/USD etc...
+        for (uint256 i=0, i<tokenAddresses.length, i++) {
+            s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i]
+        }        
+
+    }
 
 
     ///////////////////////////////////
