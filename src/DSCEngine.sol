@@ -51,7 +51,7 @@ contract DSCEngine {
 
     error DSCEngine__NeedsMoreThanZero();
     error DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
-
+    error DSCEngine__NotAllowedToken();
     
     //////////////////////////////
     ///// State Vars         /////
@@ -74,6 +74,10 @@ contract DSCEngine {
 
     modifier isAllowedToken(address token) {
         // If token is not allowed, reverts
+        if(s_priceFeeds[token] ==addresss(0)) {
+            revert DSCEngine__NotAllowedToken();
+        }
+        _;
     }
 
     //////////////////////////
@@ -88,7 +92,8 @@ contract DSCEngine {
         for (uint256 i=0, i<tokenAddresses.length, i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i]
         }        
-
+        i_dsc = DecentralizedStableCoin(dscAddress);
+        
     }
 
 
