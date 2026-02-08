@@ -22,7 +22,7 @@ pragma solidity ^0.8.18;
 // private
 // view & pure functions
 
-import {} from "";
+import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 
 /**
  * @title DSCEngine
@@ -58,6 +58,8 @@ contract DSCEngine {
     //////////////////////////////
 
     mapping(address token=>address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
+
+    DecentralizedStableCoin private immutable i_dsc;
 
     //////////////////////////
     ///// Modifiers      /////
