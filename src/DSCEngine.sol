@@ -23,6 +23,7 @@ pragma solidity ^0.8.18;
 // view & pure functions
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title DSCEngine
@@ -42,7 +43,7 @@ import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
  * @notice This contract is VERY loosely based on the MakerDAO DSS (DAI) system.
  */
 
-contract DSCEngine {
+contract DSCEngine is ReentrancyGuard {
 
     
     //////////////////////////
@@ -118,8 +119,10 @@ contract DSCEngine {
     /**
      * @param tokenCollateralAddress The address of the token to deposit as collateral
      * @param amountCollateral The amount of collateral to deposit
+     * @notice re-entrancy is the most common attacks in web3, so by importing openzeppelin contracts to it and function is external, it better be non-re-entrant (will be more gas intensive but safer)
      */
-    function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral) external moreThanZero(amountCollateral) {
+    function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral) external moreThanZero(amountCollateral) isAllowedToken(tokenCollateralAddress) nonReentrant
+    {
 
     }
 
