@@ -59,7 +59,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     //////////////////////////////
 
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
-    mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
+    mapping(address user => mapping(address collateralToken => uint256 amount)) private s_collateralDeposited;
 
     BiotainStableCoin private immutable i_biotain;
 
@@ -137,7 +137,7 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     {
         s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral; //Effects
-        emit s_collateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral); //Effects
+        emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral); //Effects
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral); //Interactions
         if (!success) {
             revert BIOTAINEngine__TransferFailed();
