@@ -22,12 +22,12 @@ pragma solidity ^0.8.18;
 // private
 // view & pure functions
 
-import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {BiotainStableCoin} from "./BiotainStableCoin.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * @title DSCEngine
+ * @title BIOTAINEngine
  * @author Khuslen Ganbat
  *
  * The system is designed to be minimal as possible, and have the tokens maintain a 1 token is equals to 1$ pegged.
@@ -44,15 +44,15 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @notice This contract is VERY loosely based on the MakerDAO DSS (DAI) system.
  */
 
-contract DSCEngine is ReentrancyGuard {
+contract BIOTAINEngine is ReentrancyGuard {
     //////////////////////////
     ///// Errors         /////
     //////////////////////////
 
-    error DSCEngine__NeedsMoreThanZero();
-    error DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
-    error DSCEngine__NotAllowedToken();
-    error DSCEngine__TransferFailed();
+    error BIOTAINEngine__NeedsMoreThanZero();
+    error BIOTAINEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+    error BIOTAINEngine__NotAllowedToken();
+    error BIOTAINEngine__TransferFailed();
 
     //////////////////////////////
     ///// State Vars         /////
@@ -61,7 +61,7 @@ contract DSCEngine is ReentrancyGuard {
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
 
-    DecentralizedStableCoin private immutable i_dsc;
+    BiotainStableCoin private immutable i_dsc;
 
     //////////////////////////
     ///// Events         /////
@@ -75,7 +75,7 @@ contract DSCEngine is ReentrancyGuard {
 
     modifier moreThanZero(uint256 amount) {
         if (amount == 0) {
-            revert DSCEngine__NeedsMoreThanZero();
+            revert BIOTAINEngine__NeedsMoreThanZero();
         }
         _;
     }
@@ -83,7 +83,7 @@ contract DSCEngine is ReentrancyGuard {
     modifier isAllowedToken(address token) {
         // If token is not allowed, reverts
         if (s_priceFeeds[token] == addresss(0)) {
-            revert DSCEngine__NotAllowedToken();
+            revert BIOTAINEngine__NotAllowedToken();
         }
         _;
     }
@@ -95,14 +95,14 @@ contract DSCEngine is ReentrancyGuard {
     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
         // Every price feed that using will be USD backed.
         if (tokenAddresses.length != priceFeedAddresses.length) {
-            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+            revert BIOTAINEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
         }
         // e.g => ETH/USD, BTH/USD, MKR/USD etc...
 
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
         }
-        i_dsc = DecentralizedStableCoin(dscAddress);
+        i_dsc = BiotainStableCoin(dscAddress);
     }
 
     ///////////////////////////////////
@@ -140,15 +140,16 @@ contract DSCEngine is ReentrancyGuard {
         emit s_collateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral); //Effects
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral); //Interactions
         if (!success) {
-            revert DSCEngine__TransferFailed();
+            revert BIOTAINEngine__TransferFailed();
         }
     }
 
     function redeemCollateral() external {}
 
-    function mintDsc() external {}
+    // 1. Check if the value of collateral is always greater than DSC amount
+    function mintBiotain() external {}
 
-    function burnDsc() external {}
+    function burnBiotain() external {}
 
     function liquidate() external {}
 
