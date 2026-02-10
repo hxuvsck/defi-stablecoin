@@ -38,9 +38,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  *
  * It is similar to DAI if DAI had no governance, no fees, and was only backed by wETH and wBTC.
  *
- * Our DSC system should always be "overcollateralized". At no point, should the value of all collateral is minimum or equal to the $ backed value of all the DSC.
+ * Our BIOTAIN system should always be "overcollateralized". At no point, should the value of all collateral is minimum or equal to the $ backed value of all the BIOTAIN.
  *
- * @notice This contract is the core of the DSC System. It handles all the logic for minting and redeeming DSC. As well as depositing and withdrawing collateral.
+ * @notice This contract is the core of the BIOTAIN System. It handles all the logic for minting and redeeming BIOTAIN. As well as depositing and withdrawing collateral.
  * @notice This contract is VERY loosely based on the MakerDAO DSS (DAI) system.
  */
 
@@ -61,7 +61,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
 
-    BiotainStableCoin private immutable i_dsc;
+    BiotainStableCoin private immutable i_biotain;
 
     //////////////////////////
     ///// Events         /////
@@ -92,7 +92,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     ///// Functions      /////
     //////////////////////////
 
-    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address biotainAddress) {
         // Every price feed that using will be USD backed.
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert BIOTAINEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
@@ -102,22 +102,22 @@ contract BIOTAINEngine is ReentrancyGuard {
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
         }
-        i_dsc = BiotainStableCoin(dscAddress);
+        i_biotain = BiotainStableCoin(biotainAddress);
     }
 
     ///////////////////////////////////
     ///// External Functions      /////
     ///////////////////////////////////
 
-    function despositCollateralAndMintDsc() external {}
+    function despositCollateralAndMintBiotain() external {}
 
-    function redeemCollateralForDsc() external {}
+    function redeemCollateralForBiotain() external {}
 
     // Threshold to let's say 150%
     // $100 ETH -> $75 ETH
-    // $50  DSC
+    // $50  BIOTAIN
 
-    // Hey, if someone pays back your minted DSC, they can have all your collateral for a discount.
+    // Hey, if someone pays back your minted BIOTAIN, they can have all your collateral for a discount.
     // Ломбардны систем шиг, хэрэв оруулсан хөрөнгийн хэмжээ тухайн зээлдүүлсэн хэмжээний хувьчлалаас хэтэрвэл өөр хэрэглэгч тухайн зээлдүүлсэн хөрөнгийг өмнөөс нь төлөн оруулсан хөрөнгийг авч, ашиг хийх процесс яригдав.
 
     /**
@@ -146,7 +146,7 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     function redeemCollateral() external {}
 
-    // 1. Check if the value of collateral is always greater than DSC amount
+    // 1. Check if the value of collateral is always greater than BIOTAIN amount
     function mintBiotain() external {}
 
     function burnBiotain() external {}
