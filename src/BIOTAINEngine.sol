@@ -82,7 +82,7 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     modifier isAllowedToken(address token) {
         // If token is not allowed, reverts
-        if (s_priceFeeds[token] == addresss(0)) {
+        if (s_priceFeeds[token] == address(0)) {
             revert BIOTAINEngine__NotAllowedToken();
         }
         _;
