@@ -60,6 +60,7 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address collateralToken => uint256 amount)) private s_collateralDeposited;
+    mapping(address user => uint256 amountBiotainMinted) private s_BiotainMinted;
 
     BiotainStableCoin private immutable i_biotain;
 
@@ -147,11 +148,52 @@ contract BIOTAINEngine is ReentrancyGuard {
     function redeemCollateral() external {}
 
     // 1. Check if the value of collateral is always greater than BIOTAIN amount
-    function mintBiotain() external {}
+    // $200 ETH -> $20 BIOTAIN
+    /**
+     * @notice follows CEI
+     * @param amountBiotainToMint The amount of decentralized stable coin to mint.
+     * @notice They must have more collateral value than minimum threshold.
+     */
+    function mintBiotain(uint256 amountBiotainToMint) external moreThanZero(amountBiotainToMint) nonReentrant {
+        s_BiotainMinted[msg.sender] += amountBiotainToMint;
+        // If minted too much ($150 BIOTAIN, $100 ETH) it mnust be 100% reverted
+        revertIfHealthFactorIsBroken(msg.sender);
+    }
 
     function burnBiotain() external {}
 
     function liquidate() external {}
 
     function getHealthFactor() external view {}
+
+    /////////////////////////////////////////////
+    ///// Private & Internal View Functions /////
+    /////////////////////////////////////////////
+
+    function _getAccountInformation(address user) private view returns(uint256 totalBiotainMinted, uint256 collateralValueInUsd){
+        totalBiotainMinted = s_BiotainMinted[user];
+        collateralValueInUsd = getAccountCollateralValue(user);
+    }
+
+    /**
+     *
+     * Returns how close to liquidation a user is
+     * If a user goes below 1, then they can get liquidated
+     */
+    function _healthFactor(address user) private view returns (uint256) {
+        // total BIOTAIN minted
+        // total collateral VALUE
+        (uint256 totalBiotanMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+    }
+
+    function _revertIfHealthFactorIsBroken(address user) internal view {
+        // 1. Check health factor (do they have enough collateral?)
+        // 2. Revert if they don't
+    }
+    
+    /////////////////////////////////////////////
+    ///// Public & External View Functions //////
+    /////////////////////////////////////////////
+
+    function getAccountCollateralValue(address user) public view returns(uint256){}
 }
