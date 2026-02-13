@@ -25,7 +25,7 @@ pragma solidity ^0.8.18;
 import {BiotainStableCoin} from "./BiotainStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol"; 
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /**
  * @title BIOTAINEngine
@@ -61,6 +61,8 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     uint256 private constant ADDITIONAL_FEED_PRECISION = 1e10;
     uint256 private constant PRECISION = 1e18;
+    uint256 private constant LIQUIDATION_THRESHOLD = 50; // 200% overcollaterized
+    uint256 private constant LIQUIDATION_PRECISION = 100;
 
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address collateralToken => uint256 amount)) private s_collateralDeposited;
@@ -176,7 +178,11 @@ contract BIOTAINEngine is ReentrancyGuard {
     ///// Private & Internal View Functions /////
     /////////////////////////////////////////////
 
-    function _getAccountInformation(address user) private view returns(uint256 totalBiotainMinted, uint256 collateralValueInUsd){
+    function _getAccountInformation(address user)
+        private
+        view
+        returns (uint256 totalBiotainMinted, uint256 collateralValueInUsd)
+    {
         totalBiotainMinted = s_BiotainMinted[user];
         collateralValueInUsd = getAccountCollateralValue(user);
     }
@@ -190,29 +196,35 @@ contract BIOTAINEngine is ReentrancyGuard {
         // total BIOTAIN minted
         // total collateral VALUE
         (uint256 totalBiotanMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+        // return (collateralValueInUsd / totalBiotanMinted); // 100 / 100 is undercollateralized, must be undercollaterized
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        // 150$ ETH * 50 / 100 = 75% < 100%
+        return (collateralAdjustedForThreshold * PRECISION / totalBiotanMinted);
     }
 
     function _revertIfHealthFactorIsBroken(address user) internal view {
         // 1. Check health factor (do they have enough collateral?)
         // 2. Revert if they don't
-    }
-    
+
+        }
+
     /////////////////////////////////////////////
     ///// Public & External View Functions //////
     /////////////////////////////////////////////
 
-    function getAccountCollateralValue(address user) public view returns(uint256 totalCollateralValueInUsd){
+    function getAccountCollateralValue(address user) public view returns (uint256 totalCollateralValueInUsd) {
         // loop through each collateral token, get the amount they have deposited, and map it to the price, to get the USD value.
-        for(uint256 i=0; i<s_collateralTokens.length;i++){
+        for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             address token = s_collateralTokens[i];
             uint256 amount = s_collateralDeposited[user][token];
             totalCollateralValueInUsd += getUsdValue(token, amount);
         }
+        return totalCollateralValueInUsd;
     }
 
-    function getUsdValue(address token, uint256 amount) public view returns(uint256) {
+    function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (,int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.latestRoundData();
         // 1 ETH = $1000
         // The returned value from CL will be 1000 * 1e8
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION; // (1000 * 1e8 *(1e10)) * 1000 * 1e18;
