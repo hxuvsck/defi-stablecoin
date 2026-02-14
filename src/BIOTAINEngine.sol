@@ -165,7 +165,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     function mintBiotain(uint256 amountBiotainToMint) external moreThanZero(amountBiotainToMint) nonReentrant {
         s_BiotainMinted[msg.sender] += amountBiotainToMint;
         // If minted too much ($150 BIOTAIN, $100 ETH) it mnust be 100% reverted
-        revertIfHealthFactorIsBroken(msg.sender);
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     function burnBiotain() external {}
