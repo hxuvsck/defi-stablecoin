@@ -55,6 +55,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     error BIOTAINEngine__NotAllowedToken();
     error BIOTAINEngine__TransferFailed();
     error BIOTAINEngine__BreaksHealthFactor(uint256 healthFactor);
+    error BIOTAINEngine__MintFailed();
 
     //////////////////////////////
     ///// State Vars         /////
@@ -168,6 +169,10 @@ contract BIOTAINEngine is ReentrancyGuard {
         s_BiotainMinted[msg.sender] += amountBiotainToMint;
         // If minted too much ($150 BIOTAIN, $100 ETH) it mnust be 100% reverted
         _revertIfHealthFactorIsBroken(msg.sender);
+        bool minted = i_biotain.mint(msg.sender, amountBiotainToMint);
+        if (!minted) {
+            revert BIOTAINEngine__MintFailed();
+        }
     }
 
     function burnBiotain() external {}
