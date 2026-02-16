@@ -54,6 +54,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     error BIOTAINEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
     error BIOTAINEngine__NotAllowedToken();
     error BIOTAINEngine__TransferFailed();
+    error BIOTAINEngine__BreaksHealthFactor(uint256 healthFactor);
 
     //////////////////////////////
     ///// State Vars         /////
@@ -63,6 +64,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     uint256 private constant PRECISION = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // 200% overcollaterized
     uint256 private constant LIQUIDATION_PRECISION = 100;
+    uint256 private constant MIN_HEALTH_FACTOR = 1;
 
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address collateralToken => uint256 amount)) private s_collateralDeposited;
@@ -205,8 +207,11 @@ contract BIOTAINEngine is ReentrancyGuard {
     function _revertIfHealthFactorIsBroken(address user) internal view {
         // 1. Check health factor (do they have enough collateral?)
         // 2. Revert if they don't
-
+        uint256 userHealthFactor = _healthFactor(user);
+        if (userHealthFactor < MIN_HEALTH_FACTOR) {
+            revert BIOTAINEngine__BreaksHealthFactor(userHealthFactor);
         }
+    }
 
     /////////////////////////////////////////////
     ///// Public & External View Functions //////
