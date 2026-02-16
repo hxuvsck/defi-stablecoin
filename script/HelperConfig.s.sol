@@ -8,5 +8,8 @@ contract HelperConfig is Script {
     struct NetworkConfig {
         address wethUsdPriceFeed; //erc20 version of eth
         address wbtcUsdPriceFeed;
+        address weth;
+        address wbtc;
+        uint256 deployerKey;
     }
 }
