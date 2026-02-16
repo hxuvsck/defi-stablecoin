@@ -22,7 +22,7 @@ contract DeployBiotainStableCoin is Script {
         BiotainStableCoin bsc = new BiotainStableCoin();
         BIOTAINEngine engine = new BIOTAINEngine(tokenAddresses, priceFeedAddresses, address(bsc));
 
-        bsc.transferOwnership(address(engine))
+        bsc.transferOwnership(address(engine));
         vm.stopBroadcast();
         return (bsc, engine);
     }
