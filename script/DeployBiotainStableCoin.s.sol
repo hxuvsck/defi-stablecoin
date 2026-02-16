@@ -9,7 +9,7 @@ contract DeployBiotainStableCoin is Script {
     function run() external returns (BiotainStableCoin, BIOTAINEngine) {
         vm.startBroadcast();
         BiotainStableCoin bsc = new BiotainStableCoin();
-        BIOTAINEngine engine = new BIOTAINEngine();
+        // BIOTAINEngine engine = new BIOTAINEngine();
         vm.stopBroadcast();
         return (bsc, engine);
     }
