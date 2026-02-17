@@ -5,7 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {BiotainStableCoin} from "../../src/BiotainStableCoin.sol";
 import {DeployBiotainStableCoin} from "../../script/DeployBiotainStableCoin.s.sol";
 
-contract TestBiotainStableCoin is Test {
+contract BiotainStableCoinTest is Test {
     BiotainStableCoin biotainStableCoin;
 
     function setUp() external {
