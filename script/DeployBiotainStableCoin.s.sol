@@ -10,8 +10,8 @@ contract DeployBiotainStableCoin is Script {
     address[] public tokenAddresses;
     address[] public priceFeedAddresses;
 
-    function run() external returns (BiotainStableCoin, BIOTAINEngine) {
-        HelperConfig config = new HelperConfig();
+    function run() external returns (BiotainStableCoin, BIOTAINEngine, HelperConfig) {
+        HelperConfig helperConfig = new HelperConfig();
 
         (address wethUsdPriceFeed, address wbtcUsdPriceFeed, address weth, address wbtc, uint256 deployerKey) =
             helperConfig.activeNetworkConfig();
@@ -24,6 +24,6 @@ contract DeployBiotainStableCoin is Script {
 
         bsc.transferOwnership(address(engine));
         vm.stopBroadcast();
-        return (bsc, engine);
+        return (bsc, engine, helperConfig);
     }
 }

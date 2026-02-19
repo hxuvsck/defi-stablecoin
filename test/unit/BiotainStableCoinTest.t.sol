@@ -6,11 +6,10 @@ import {BiotainStableCoin} from "../../src/BiotainStableCoin.sol";
 import {DeployBiotainStableCoin} from "../../script/DeployBiotainStableCoin.s.sol";
 
 contract BiotainStableCoinTest is Test {
-    BiotainStableCoin biotainStableCoin;
+    BiotainStableCoin bsc;
 
     function setUp() external {
-        DeployBiotainStableCoin deployBiotainStableCoin = new DeployBiotainStableCoin();
-        biotainStableCoin = deployBiotainStableCoin.run();
+        bsc = new BiotainStableCoin();
     }
 
     function testIsMinting() public {}

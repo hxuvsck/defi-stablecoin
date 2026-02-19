@@ -48,7 +48,7 @@ contract BiotainStableCoin is ERC20Burnable, Ownable {
     error BiotainStableCoin__BurnAmountExceedsBalance();
     error BiotainStableCoin__NotZeroAddress();
 
-    constructor() ERC20("BiotainStableCoin", "BIOTAIN") Ownable(msg.sender) {}
+    constructor() ERC20("BiotainStableCoin", "BIOTAIN") {}
 
     function burn(uint256 _amount) public override onlyOwner {
         uint256 balance = balanceOf(msg.sender);
