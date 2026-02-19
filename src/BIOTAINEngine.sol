@@ -121,7 +121,21 @@ contract BIOTAINEngine is ReentrancyGuard {
     ///// External Functions      /////
     ///////////////////////////////////
 
-    function despositCollateralAndMintBiotain() external {}
+    /**
+     *
+     * @param tokenCollateralAddress The address of a token to deposit as collateral
+     * @param amountCollateral The amount collateral to deposit
+     * @param AmountBiotainToMint The amount of decentralized stablecoin to mint
+     * @notice This function will deposit your collateral and mint BIOTAIN in one tx.
+     */
+    function despositCollateralAndMintBiotain(
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
+        uint256 AmountBiotainToMint
+    ) external {
+        depositCollateral(tokenCollateralAddress, amountCollateral);
+        mintBiotain(AmountBiotainToMint); // make it public unless external function cannot call in contract itself (both depositCol and mintBiotain are made public since this LOC)
+    }
 
     function redeemCollateralForBiotain() external {}
 
@@ -142,7 +156,7 @@ contract BIOTAINEngine is ReentrancyGuard {
      * @notice follow CEI (Checks,Effects,Interactions)
      */
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
-        external
+        public
         moreThanZero(amountCollateral) //Checks
         isAllowedToken(tokenCollateralAddress) //Checks
         nonReentrant //Checks
@@ -165,7 +179,7 @@ contract BIOTAINEngine is ReentrancyGuard {
      * @param amountBiotainToMint The amount of decentralized stable coin to mint.
      * @notice They must have more collateral value than minimum threshold.
      */
-    function mintBiotain(uint256 amountBiotainToMint) external moreThanZero(amountBiotainToMint) nonReentrant {
+    function mintBiotain(uint256 amountBiotainToMint) public moreThanZero(amountBiotainToMint) nonReentrant {
         s_BiotainMinted[msg.sender] += amountBiotainToMint;
         // If minted too much ($150 BIOTAIN, $100 ETH) it mnust be 100% reverted
         _revertIfHealthFactorIsBroken(msg.sender);
