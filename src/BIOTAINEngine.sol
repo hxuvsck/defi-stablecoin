@@ -139,6 +139,15 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     function redeemCollateralForBiotain() external {}
 
+    // in order to redeem collateral:
+    // 1. Health factor must be over 1 AFTER collateral pulled
+    // DRY: Don't repeat yourself
+    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
+        external
+        moreThanZero(amountCollateral)
+        nonReentrant
+    {}
+
     // Threshold to let's say 150%
     // $100 ETH -> $75 ETH
     // $50  BIOTAIN
@@ -169,8 +178,6 @@ contract BIOTAINEngine is ReentrancyGuard {
             revert BIOTAINEngine__TransferFailed();
         }
     }
-
-    function redeemCollateral() external {}
 
     // 1. Check if the value of collateral is always greater than BIOTAIN amount
     // $200 ETH -> $20 BIOTAIN
