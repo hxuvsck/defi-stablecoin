@@ -72,7 +72,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     mapping(address user => uint256 amountBiotainMinted) private s_BiotainMinted;
     address[] private s_collateralTokens;
 
-    BiotainStableCoin private immutable i_biotain;
+    BiotainStableCoin private immutable i_bsc;
 
     //////////////////////////
     ///// Events         /////
@@ -115,7 +115,7 @@ contract BIOTAINEngine is ReentrancyGuard {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
             s_collateralTokens.push(tokenAddresses[i]);
         }
-        i_biotain = BiotainStableCoin(biotainAddress);
+        i_bsc = BiotainStableCoin(biotainAddress);
     }
 
     ///////////////////////////////////
@@ -138,7 +138,22 @@ contract BIOTAINEngine is ReentrancyGuard {
         mintBiotain(AmountBiotainToMint); // make it public unless external function cannot call in contract itself (both depositCol and mintBiotain are made public since this LOC)
     }
 
-    function redeemCollateralForBiotain() external {}
+    /**
+     *
+     * @param tokenCollateralAddress The collateral address to redeem
+     * @param amountCollateral The amount collateral to redeem
+     * @param amountBiotainToBurn The amount of Biotain to burn
+     * This function burns BIOTAIN and redeems underlying collateral in one transaction
+     */
+    function redeemCollateralForBiotain(
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
+        uint256 amountBiotainToBurn
+    ) external {
+        burnBiotain(amountBiotainToBurn);
+        redeemCollateral(tokenCollateralAddress, amountCollateral);
+        // redeemCollateral already checks health factor is broken or not
+    }
 
     // in order to redeem collateral:
     // 1. Health factor must be over 1 AFTER collateral pulled
@@ -146,7 +161,7 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     // CEI: Checks, Effects, Interactions
     function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
-        external
+        public
         moreThanZero(amountCollateral)
         nonReentrant
     {
@@ -202,13 +217,21 @@ contract BIOTAINEngine is ReentrancyGuard {
         s_BiotainMinted[msg.sender] += amountBiotainToMint;
         // If minted too much ($150 BIOTAIN, $100 ETH) it mnust be 100% reverted
         _revertIfHealthFactorIsBroken(msg.sender);
-        bool minted = i_biotain.mint(msg.sender, amountBiotainToMint);
+        bool minted = i_bsc.mint(msg.sender, amountBiotainToMint);
         if (!minted) {
             revert BIOTAINEngine__MintFailed();
         }
     }
 
-    function burnBiotain() external {}
+    function burnBiotain(uint256 amount) public moreThanZero(amount) {
+        s_BiotainMinted[msg.sender] -= amount;
+        bool success = i_bsc.transferFrom(msg.sender, address(this), amount);
+        if (!success) {
+            revert BIOTAINEngine__TransferFailed();
+        }
+        i_bsc.burn(amount);
+        _revertIfHealthFactorIsBroken(msg.sender); //Don't think it will ever hit... (So by doing the code and gas audit, we could ask for LOC is needed or not)
+    }
 
     function liquidate() external {}
 
