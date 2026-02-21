@@ -79,6 +79,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     //////////////////////////
 
     event CollateralDeposited(address indexed user, address indexed token, uint256 amount);
+    event CollateralRedeemed(address indexed user, address indexed token, uint256 indexed amount);
 
     //////////////////////////
     ///// Modifiers      /////
@@ -141,12 +142,23 @@ contract BIOTAINEngine is ReentrancyGuard {
 
     // in order to redeem collateral:
     // 1. Health factor must be over 1 AFTER collateral pulled
-    // DRY: Don't repeat yourself
+    // DRY: Don't repeat yourself (Will refactor after we done as DRY in comp.sci says)
+
+    // CEI: Checks, Effects, Interactions
     function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
         external
         moreThanZero(amountCollateral)
         nonReentrant
-    {}
+    {
+        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
+        // _calculateHealthFactorAfter();
+        bool success = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
+        if (!success) {
+            revert BIOTAINEngine__TransferFailed();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
+    }
 
     // Threshold to let's say 150%
     // $100 ETH -> $75 ETH
