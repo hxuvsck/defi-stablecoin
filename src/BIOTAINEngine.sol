@@ -233,7 +233,34 @@ contract BIOTAINEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender); //Don't think it will ever hit... (So by doing the code and gas audit, we could ask for LOC is needed or not)
     }
 
-    function liquidate() external {}
+    // If we do start nearing undercollateralization,we need someone to liquidate positions
+
+    // $100 ETH backing $50 BIOTAIN
+    // $20 ETH back $50 BIOTAIN <- BIOTAIN isn't worth $1.
+
+    // $75 backing $50 BIOTAIN
+    // liquidator take $75 backing and burns off the $50 BIOTAIN
+
+    // if someone is undercollateralized, we will pay to liquidate them!
+
+    /**
+     *
+     * @param collateral The ERC20 collateral to liquidate from the user
+     * @param user The user who has broken the health factor. Their _healthFactor should be below MIN_HEALTH_FACTOR
+     * @param debtToCover The amount of BIOTAIN we want to burn to improve the users health factor
+     * @notice You can partially liquidate user.
+     * @notice You will get a liquidation bonus for taking the users funds
+     * @notice This function working assumes the procotol will be roughly 200% overcollateralized in order for this to work.
+     * @notice A known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentive the liquidators.
+     * For example, if the price of the collateral plummeted before anyone could be liquidated.
+     */
+    function liquidate(address collateral, address user, uint256 debtToCover)
+        external
+        moreThanZero(debtToCover)
+        nonReentrant
+    {
+        // need to check health factor of the user. Is this user even liquidatable?
+    }
 
     function getHealthFactor() external view {}
 
