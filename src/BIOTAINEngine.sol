@@ -81,7 +81,9 @@ contract BIOTAINEngine is ReentrancyGuard {
     //////////////////////////
 
     event CollateralDeposited(address indexed user, address indexed token, uint256 amount);
-    event CollateralRedeemed(address indexed user, address indexed token, uint256 indexed amount);
+    event CollateralRedeemed(
+        address indexed redeemedFrom, address indexed redeemedTo, address indexed token, uint256 amount
+    );
 
     //////////////////////////
     ///// Modifiers      /////
@@ -167,13 +169,7 @@ contract BIOTAINEngine is ReentrancyGuard {
         moreThanZero(amountCollateral)
         nonReentrant
     {
-        s_collateralDeposited[msg.sender][tokenCollateralAddress] -= amountCollateral;
-        emit CollateralRedeemed(msg.sender, tokenCollateralAddress, amountCollateral);
-        // _calculateHealthFactorAfter();
-        bool success = IERC20(tokenCollateralAddress).transfer(msg.sender, amountCollateral);
-        if (!success) {
-            revert BIOTAINEngine__TransferFailed();
-        }
+        _redeemCollateral(msg.sender, msg.sender, tokenCollateralAddress, amountCollateral);
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
@@ -278,7 +274,10 @@ contract BIOTAINEngine is ReentrancyGuard {
         // We should implement a feature to liquidate in the event the protocol is insolvent
         // And sweep extra amount into a treasury
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
-        uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+        // uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
+        _redeemCollateral(collateral, tokenAmountFromDebtCovered + bonusCollateral, user, msg.sender);
+        // We need to burn BIOTAIN now
+        _burnBIOTAIN(debtToCover, user, msg.sender);
     }
 
     function getHealthFactor() external view {}
@@ -286,6 +285,20 @@ contract BIOTAINEngine is ReentrancyGuard {
     /////////////////////////////////////////////
     ///// Private & Internal View Functions /////
     /////////////////////////////////////////////
+
+    function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to)
+        private
+    {
+        s_collateralDeposited[from][tokenCollateralAddress] -= amountCollateral;
+        emit CollateralRedeemed(from, to, tokenCollateralAddress, amountCollateral);
+        // _calculateHealthFactorAfter();
+        bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
+        if (!success) {
+            revert BIOTAINEngine__TransferFailed();
+        }
+    }
+
+    function _burnBIOTAIN() private {}
 
     function _getAccountInformation(address user)
         private
