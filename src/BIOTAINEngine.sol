@@ -56,6 +56,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     error BIOTAINEngine__TransferFailed();
     error BIOTAINEngine__BreaksHealthFactor(uint256 healthFactor);
     error BIOTAINEngine__MintFailed();
+    error BIOTAINEngine__HealthFactorOk();
 
     //////////////////////////////
     ///// State Vars         /////
@@ -65,7 +66,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     uint256 private constant PRECISION = 1e18;
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // 200% overcollaterized
     uint256 private constant LIQUIDATION_PRECISION = 100;
-    uint256 private constant MIN_HEALTH_FACTOR = 1;
+    uint256 private constant MIN_HEALTH_FACTOR = 1e18;
 
     mapping(address token => address priceFeed) private s_priceFeeds; // tokenToPriceFeeds
     mapping(address user => mapping(address collateralToken => uint256 amount)) private s_collateralDeposited;
@@ -253,6 +254,7 @@ contract BIOTAINEngine is ReentrancyGuard {
      * @notice This function working assumes the procotol will be roughly 200% overcollateralized in order for this to work.
      * @notice A known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentive the liquidators.
      * For example, if the price of the collateral plummeted before anyone could be liquidated.
+     * Follows CEI: Checks, Effects, Interactions
      */
     function liquidate(address collateral, address user, uint256 debtToCover)
         external
@@ -260,6 +262,16 @@ contract BIOTAINEngine is ReentrancyGuard {
         nonReentrant
     {
         // need to check health factor of the user. Is this user even liquidatable?
+        uint256 startingUserHealthFactor = _healthFactor(user);
+        if (startingUserHealthFactor >= MIN_HEALTH_FACTOR) {
+            revert BIOTAINEngine__HealthFactorOk();
+        }
+        // We want to burn BIOTAIN "debt"
+        // And take their collateral
+        // Bad user: $140 ETH, $100 BIOTAIN
+        // debtToCover = $100
+        // $100 BIOTAIN = ??? ETH
+        uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(collateral, debtToCover);
     }
 
     function getHealthFactor() external view {}
@@ -304,6 +316,15 @@ contract BIOTAINEngine is ReentrancyGuard {
     /////////////////////////////////////////////
     ///// Public & External View Functions //////
     /////////////////////////////////////////////
+
+    function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
+        // price of ETH (token)
+        // $/ETH ETH ???
+        // $2000 / ETH. $1000 = 0.5ETH
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
+    }
 
     function getAccountCollateralValue(address user) public view returns (uint256 totalCollateralValueInUsd) {
         // loop through each collateral token, get the amount they have deposited, and map it to the price, to get the USD value.
