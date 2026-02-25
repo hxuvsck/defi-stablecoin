@@ -57,6 +57,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     error BIOTAINEngine__BreaksHealthFactor(uint256 healthFactor);
     error BIOTAINEngine__MintFailed();
     error BIOTAINEngine__HealthFactorOk();
+    error BIOTAINEngine__HealthFactorNotImproved();
 
     //////////////////////////////
     ///// State Vars         /////
@@ -275,9 +276,15 @@ contract BIOTAINEngine is ReentrancyGuard {
         // And sweep extra amount into a treasury
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
         // uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
-        _redeemCollateral(collateral, tokenAmountFromDebtCovered + bonusCollateral, user, msg.sender);
+        _redeemCollateral(user, msg.sender, collateral, tokenAmountFromDebtCovered + bonusCollateral);
         // We need to burn BIOTAIN now
         _burnBIOTAIN(debtToCover, user, msg.sender);
+
+        uint256 endingUserHealthFactor = _healthFactor(user);
+        if (endingUserHealthFactor <= startingUserHealthFactor) {
+            revert BIOTAINEngine__HealthFactorNotImproved();
+        }
+        _revertIfHealthFactorIsBroken(msg.sender);
     }
 
     function getHealthFactor() external view {}
@@ -286,7 +293,7 @@ contract BIOTAINEngine is ReentrancyGuard {
     ///// Private & Internal View Functions /////
     /////////////////////////////////////////////
 
-    function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to)
+    function _redeemCollateral(address from, address to, address tokenCollateralAddress, uint256 amountCollateral)
         private
     {
         s_collateralDeposited[from][tokenCollateralAddress] -= amountCollateral;
@@ -298,7 +305,15 @@ contract BIOTAINEngine is ReentrancyGuard {
         }
     }
 
-    function _burnBIOTAIN() private {}
+    function _burnBIOTAIN(uint256 amountBiotainToBurn, address onBehalfOf, address biotainFrom) private {
+        s_BiotainMinted[onBehalfOf] -= amountBiotainToBurn;
+        bool success = i_bsc.transferFrom(biotainFrom, address(this), amountBiotainToBurn);
+        // This conditional is hypothetically unreachable
+        if (!success) {
+            revert BIOTAINEngine__TransferFailed();
+        }
+        i_bsc.burn(amountBiotainToBurn);
+    }
 
     function _getAccountInformation(address user)
         private
