@@ -305,6 +305,16 @@ contract BIOTAINEngine is ReentrancyGuard {
         }
     }
 
+    /**
+     * @param amountBiotainToBurn The amount of BIOTAIN tokens to burn (in wei precision)
+     * to reduce the minted debt of `onBehalfOf`
+     * @param onBehalfOf The address whose minted BIOTAIN balance (debt) will be reduced
+     * @param biotainFrom The address from which the BIOTAIN tokens will be transferred
+     * before being burned (must have approved this contract)
+     * @dev Low-level internal function. Do not call unless the function calling it
+     * is checking for health factors being broken.
+     */
+
     function _burnBIOTAIN(uint256 amountBiotainToBurn, address onBehalfOf, address biotainFrom) private {
         s_BiotainMinted[onBehalfOf] -= amountBiotainToBurn;
         bool success = i_bsc.transferFrom(biotainFrom, address(this), amountBiotainToBurn);
