@@ -15,7 +15,9 @@ contract BIOTAINEngineTest is Test {
     BIOTAINEngine engine;
     HelperConfig config;
     address ethUsdPriceFeed;
+    address btcUsdPriceFeed;
     address weth;
+    address wbtc;
 
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
@@ -23,13 +25,28 @@ contract BIOTAINEngineTest is Test {
     function setUp() public {
         deployer = new DeployBiotainStableCoin();
         (bsc, engine, config) = deployer.run();
-        (ethUsdPriceFeed,, weth,,) = config.activeNetworkConfig();
+        (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc,) = config.activeNetworkConfig();
 
         // for better test, we made a mint for user in setUp
-        
     }
 
     // First test is to check the price feed retrieval (getFunc) which is GetUsdValue. It has some weird math functions that needs to be checked
+
+    ///////////////////////////////
+    //// Constructor tests ///////
+    //////////////////////////////
+
+    address[] public tokenAddresses;
+    address[] public priceFeedAddresses;
+
+    function testRevertsIfTokenLengthDoesntMatchPriceFeeds() public {
+        tokenAddresses.push(weth);
+        priceFeedAddresses.push(ethUsdPriceFeed);
+        priceFeedAddresses.push(btcUsdPriceFeed);
+
+        vm.expectRevert(BIOTAINEngine.BIOTAINEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength.selector);
+        new BIOTAINEngine(tokenAddresses, priceFeedAddresses, address(bsc));
+    }
 
     ////////////////////////
     //// Price tests ///////
