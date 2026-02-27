@@ -21,6 +21,16 @@ contract BIOTAINEngineTest is Test {
 
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
+    uint256 amountCollateral = 10 ether;
+    uint256 amountToMint = 100 ether;
+
+    uint256 public constant STARTING_USER_BALANCE = 10 ether;
+    uint256 public constant MIN_HEALTH_FACTOR = 1e18;
+    uint256 public constant LIQUIDATION_THRESHOLD = 50;
+
+    // Liquidation
+    address public liquidator = makeAddr("liquidator");
+    uint256 public collateralToCover = 20 ether;
 
     function setUp() public {
         deployer = new DeployBiotainStableCoin();
@@ -28,6 +38,8 @@ contract BIOTAINEngineTest is Test {
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc,) = config.activeNetworkConfig();
 
         // for better test, we made a mint for user in setUp
+        ERC20Mock(weth).mint(USER, STARTING_USER_BALANCE);
+        ERC20Mock(wbtc).mint(USER, STARTING_USER_BALANCE);
     }
 
     // First test is to check the price feed retrieval (getFunc) which is GetUsdValue. It has some weird math functions that needs to be checked
@@ -93,6 +105,23 @@ contract BIOTAINEngineTest is Test {
     }
     // re-entrancy constructor test skipped for now
 
+    // Adding modifiers since depositCollateral has a lot stuff to do
+
+    modifier depositedCollateral() {
+        vm.startPrank(USER);
+        ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
+        engine.depositCollateral(weth, AMOUNT_COLLATERAL);
+        vm.stopPrank();
+        _;
+    }
+
     // s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
-    function testCanDepositCollateralAndGetAccountInfo() public {}
+    function testCanDepositCollateralAndGetAccountInfo() public depositedCollateral {
+        (uint256 totalBiotainMinted, uint256 collateralValueInUsd) = engine.getAccountInformation(USER);
+
+        uint256 expectedTotalBiotainMinted = 0;
+        uint256 expectedDepositAmount = engine.getTokenAmountFromUsd(weth, collateralValueInUsd);
+        assertEq(totalBiotainMinted, expectedTotalBiotainMinted);
+        assertEq(AMOUNT_COLLATERAL, expectedDepositAmount);
+    }
 }
