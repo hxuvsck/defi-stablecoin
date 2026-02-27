@@ -61,6 +61,14 @@ contract BIOTAINEngineTest is Test {
         assertEq(expectedUsd, actualUsd);
     }
 
+    function testGetTokenAmountFromUsd() public {
+        uint256 usdAmount = 100 ether;
+        // $2000 / $100 ETH
+        uint256 expectedWeth = 0.05 ether;
+        uint256 actualWeth = engine.getTokenAmountFromUsd(weth, usdAmount);
+        assertEq(expectedWeth, actualWeth);
+    }
+
     ////////////////////////////////////
     //// depositCollateral Tests ///////
     ////////////////////////////////////
