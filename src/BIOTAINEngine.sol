@@ -134,7 +134,7 @@ contract BIOTAINEngine is ReentrancyGuard {
      * @param AmountBiotainToMint The amount of decentralized stablecoin to mint
      * @notice This function will deposit your collateral and mint BIOTAIN in one tx.
      */
-    function despositCollateralAndMintBiotain(
+    function depositCollateralAndMintBiotain(
         address tokenCollateralAddress,
         uint256 amountCollateral,
         uint256 AmountBiotainToMint
@@ -190,6 +190,7 @@ contract BIOTAINEngine is ReentrancyGuard {
      * @notice re-entrancy is the most common attacks in web3, so by importing openzeppelin contracts to it and function is external, it better be non-re-entrant (will be more gas intensive but safer)
      * @notice follow CEI (Checks,Effects,Interactions)
      */
+
     function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
         public
         moreThanZero(amountCollateral) //Checks

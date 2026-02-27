@@ -73,12 +73,22 @@ contract BIOTAINEngineTest is Test {
     //// depositCollateral Tests ///////
     ////////////////////////////////////
 
+    // moreThanZero
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
 
         vm.expectRevert(BIOTAINEngine.BIOTAINEngine__NeedsMoreThanZero.selector);
         engine.depositCollateral(weth, 0);
+        vm.stopPrank();
+    }
+
+    // isAllowedToken
+    function testRevertsWithUnapprovedCollateral() public {
+        ERC20Mock ranToken = new ERC20Mock("RAN", "RAN", USER, AMOUNT_COLLATERAL); //ranToken == random token
+        vm.startPrank(USER);
+        vm.expectRevert(BIOTAINEngine.BIOTAINEngine__NotAllowedToken.selector);
+        engine.depositCollateral(address(ranToken), AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
 }
