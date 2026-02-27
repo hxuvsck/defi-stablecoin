@@ -73,7 +73,7 @@ contract BIOTAINEngineTest is Test {
     //// depositCollateral Tests ///////
     ////////////////////////////////////
 
-    // moreThanZero
+    // moreThanZero constructor
     function testRevertsIfCollateralZero() public {
         vm.startPrank(USER);
         ERC20Mock(weth).approve(address(engine), AMOUNT_COLLATERAL);
@@ -83,7 +83,7 @@ contract BIOTAINEngineTest is Test {
         vm.stopPrank();
     }
 
-    // isAllowedToken
+    // isAllowedToken constructor
     function testRevertsWithUnapprovedCollateral() public {
         ERC20Mock ranToken = new ERC20Mock("RAN", "RAN", USER, AMOUNT_COLLATERAL); //ranToken == random token
         vm.startPrank(USER);
@@ -91,4 +91,8 @@ contract BIOTAINEngineTest is Test {
         engine.depositCollateral(address(ranToken), AMOUNT_COLLATERAL);
         vm.stopPrank();
     }
+    // re-entrancy constructor test skipped for now
+
+    // s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
+    function testCanDepositCollateralAndGetAccountInfo() public {}
 }

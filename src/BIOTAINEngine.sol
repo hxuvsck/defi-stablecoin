@@ -389,4 +389,12 @@ contract BIOTAINEngine is ReentrancyGuard {
         // The returned value from CL will be 1000 * 1e8
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION; // (1000 * 1e8 *(1e10)) * 1000 * 1e18;
     }
+
+    function getAccountInformation(address user)
+        public
+        view
+        returns (uint256 totalBiotainMinted, uint256 collateralValueInUsd)
+    {
+        (totalBiotainMinted, collateralValueInUsd) = _getAccountInformation(user);
+    }
 }
