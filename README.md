@@ -18,3 +18,9 @@ We will be making a stable-coin where it has these features during our stable-co
 Which will be using wBTC (wrapped Bitcoin which is ERC20 version of BTC), wETH (wrapped Ethereum which is ERC20 version of ETH.) for our collateral system.
 
 <!-- Some might argue that this wBTC is a little bit centralized depending on who is onboarding the Bitcoin to Ethereum, but that's not quite important for this. (Keep in mind)-->
+
+During testing, I must let:
+
+- calculate health factor function
+- set health factor if debt is 0
+- added bunch of view function <!-- As of Patrick made (See course repo) -->
