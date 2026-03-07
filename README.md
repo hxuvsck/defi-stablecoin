@@ -24,3 +24,8 @@ During testing, I must let:
 - calculate health factor function
 - set health factor if debt is 0
 - added bunch of view function <!-- As of Patrick made (See course repo) -->
+
+<!-- Fuzz/Invariant test begins here -->
+
+1. What are our invariants/properties? <!-- Stateless and stateful fuzz testing -->
+2.
