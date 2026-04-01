@@ -28,4 +28,4 @@ During testing, I must let:
 <!-- Fuzz/Invariant test begins here -->
 
 1. What are our invariants/properties? <!-- Stateless and stateful fuzz testing -->
-2.
+2. 
