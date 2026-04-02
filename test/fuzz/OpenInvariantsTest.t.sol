@@ -17,7 +17,7 @@ import {BiotainStableCoin} from "../../src/BiotainStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract OpenInvariantsTest is Test, StdInvariant {
+contract OpenInvariantsTest is StdInvariant, Test {
     DeployBiotainStableCoin deployer;
     BIOTAINEngine bsce;
     BiotainStableCoin bsc;
@@ -27,7 +27,7 @@ contract OpenInvariantsTest is Test, StdInvariant {
 
     function setUp() external {
         deployer = new DeployBiotainStableCoin();
-        (bsce, bsc, config) = deployer.run();
+        (bsc, bsce, config) = deployer.run();
         (,, weth, wbtc,) = config.activeNetworkConfig();
         targetContract(address(bsce));
     }
@@ -36,8 +36,8 @@ contract OpenInvariantsTest is Test, StdInvariant {
         // get the value of all the collateral in the protocol
         // compare it to all the debt (bsc)
         uint256 totalSupply = bsc.totalSupply();
-        uint256 totalWethDeposited = IERC20(weth).balanceOf(address.bsce);
-        uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address.bsce);
+        uint256 totalWethDeposited = IERC20(weth).balanceOf(address(bsce));
+        uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address(bsce));
 
         uint256 wethValue = bsce.getUsdValue(weth, totalWethDeposited);
         uint256 wbtcValue = bsce.getUsdValue(wbtc, totalWbtcDeposited);
