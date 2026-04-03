@@ -16,6 +16,7 @@ import {BIOTAINEngine} from "../../src/BIOTAINEngine.sol";
 import {BiotainStableCoin} from "../../src/BiotainStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Handler} from "./Handler.t.sol";
 
 contract Invariants is StdInvariant, Test {
     DeployBiotainStableCoin deployer;
@@ -24,12 +25,18 @@ contract Invariants is StdInvariant, Test {
     HelperConfig config;
     address weth;
     address wbtc;
+    Handler handler;
 
     function setUp() external {
         deployer = new DeployBiotainStableCoin();
         (bsc, bsce, config) = deployer.run();
         (,, weth, wbtc,) = config.activeNetworkConfig();
-        targetContract(address(bsce));
+        // targetContract(address(bsce));
+        handler = new Handler(bsce, bsc);
+        targetContract(address(handler));
+        // need to make it more sensible due to Handlers.
+        // in toml file, making it fail_on_revert = true as:
+        // hey, don't call redeemCollateral, unless there is collateral to redeem
     }
 
     function invariant__ProtocolMustHaveMoreValueThanTotalSupply() public view {
