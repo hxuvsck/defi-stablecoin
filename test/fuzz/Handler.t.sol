@@ -27,8 +27,6 @@ contract Handler is Test {
         wbtc = ERC20Mock(collateralTokens[1]);
     }
 
-    // redeemCollateral <-
-
     // and now, by making the first function in handler and implementing it to invariant stateful fuzz testing,
     // test will not go for a target contract as a random ones, but with only this function to revert.
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
@@ -41,6 +39,17 @@ contract Handler is Test {
         collateral.approve(address(bsce), amountCollateral);
         bsce.depositCollateral(address(collateral), amountCollateral);
         vm.stopPrank();
+    }
+
+    function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
+        ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
+        uint256 maxCollateralToRedeem = bsce.getCollateralBalanceOfUser(address(collateral), msg.sender);
+        amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem);
+        if (amountCollateral == 0) {
+            return; // in this case, we often use vm.assume cheatcode from foundry: this will discard the current fuzz run inputs and start a new fuzz run when boolean expression turns false.
+            // https://www.getfoundry.sh/reference/cheatcodes/assume#assume
+        }
+        bsce.redeemCollateral(address(collateral), amountCollateral);
     }
 
     // Helper functions
