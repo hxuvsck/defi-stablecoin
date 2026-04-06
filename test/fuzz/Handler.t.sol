@@ -27,6 +27,22 @@ contract Handler is Test {
         wbtc = ERC20Mock(collateralTokens[1]);
     }
 
+    function mintBiotain(uint256 amount) public {
+        (uint256 totalBiotainMinted, uint256 collateralValueInUsd) = bsce.getAccountInformation(msg.sender);
+
+        int256 maxBiotainToMint = (int256(collateralValueInUsd) / 2) - int256(totalBiotainMinted);
+        if (maxBiotainToMint < 0) {
+            return;
+        }
+        amount = bound(amount, 0, uint256(maxBiotainToMint));
+        if (amount == 0) {
+            return;
+        }
+        vm.startPrank(msg.sender);
+        bsce.mintBiotain(amount);
+        vm.stopPrank();
+    }
+
     // and now, by making the first function in handler and implementing it to invariant stateful fuzz testing,
     // test will not go for a target contract as a random ones, but with only this function to revert.
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
@@ -44,6 +60,8 @@ contract Handler is Test {
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         uint256 maxCollateralToRedeem = bsce.getCollateralBalanceOfUser(address(collateral), msg.sender);
+        // seems a bit deceptive even in fail on revert is true.
+        // let's say there is a bug, where a user can redeem more than they have
         amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem);
         if (amountCollateral == 0) {
             return; // in this case, we often use vm.assume cheatcode from foundry: this will discard the current fuzz run inputs and start a new fuzz run when boolean expression turns false.
