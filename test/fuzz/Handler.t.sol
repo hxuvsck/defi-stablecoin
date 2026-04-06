@@ -16,6 +16,9 @@ contract Handler is Test {
     ERC20Mock weth;
     ERC20Mock wbtc;
 
+    uint256 public timesMintIsCalled;
+    address[] public usersWithCollateralDeposited;
+
     uint256 MAX_DEPOSIT_SIZE = type(uint96).max; // the max uint96 value
 
     constructor(BIOTAINEngine _biotainEngine, BiotainStableCoin _bsc) {
@@ -27,8 +30,13 @@ contract Handler is Test {
         wbtc = ERC20Mock(collateralTokens[1]);
     }
 
-    function mintBiotain(uint256 amount) public {
-        (uint256 totalBiotainMinted, uint256 collateralValueInUsd) = bsce.getAccountInformation(msg.sender);
+    function mintBiotain(uint256 amount, uint256 addressSeed) public {
+        // msg.sender
+        if (usersWithCollateralDeposited.length == 0) {
+            return;
+        }
+        address sender = usersWithCollateralDeposited[addressSeed % usersWithCollateralDeposited.length];
+        (uint256 totalBiotainMinted, uint256 collateralValueInUsd) = bsce.getAccountInformation(sender);
 
         int256 maxBiotainToMint = (int256(collateralValueInUsd) / 2) - int256(totalBiotainMinted);
         if (maxBiotainToMint < 0) {
@@ -38,9 +46,10 @@ contract Handler is Test {
         if (amount == 0) {
             return;
         }
-        vm.startPrank(msg.sender);
+        vm.startPrank(sender);
         bsce.mintBiotain(amount);
         vm.stopPrank();
+        timesMintIsCalled++; //handler ghost variables
     }
 
     // and now, by making the first function in handler and implementing it to invariant stateful fuzz testing,
@@ -55,6 +64,8 @@ contract Handler is Test {
         collateral.approve(address(bsce), amountCollateral);
         bsce.depositCollateral(address(collateral), amountCollateral);
         vm.stopPrank();
+        // double push
+        usersWithCollateralDeposited.push(msg.sender);
     }
 
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {

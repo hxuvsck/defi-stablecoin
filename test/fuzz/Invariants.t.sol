@@ -52,7 +52,18 @@ contract Invariants is StdInvariant, Test {
         console.log("weth value", wethValue);
         console.log("wbtc value", wbtcValue);
         console.log("total supply", totalSupply);
+        console.log("Times mint called", handler.timesMintIsCalled());
 
         assert(wethValue + wbtcValue >= totalSupply);
+    }
+
+    function invariant__gettersShouldNotRevert() public view {
+        bsce.getAccountCollateralValue();
+        bsce.getAccountInformation();
+        bsce.getCollateralBalanceOfUser();
+        bsce.getCollateralTokens();
+        bsce.getHealthFactor();
+        bsce.getTokenAmountFromUsd();
+        bsce.getUsdValue();
     }
 }
