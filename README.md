@@ -28,4 +28,8 @@ During testing, I must let:
 <!-- Fuzz/Invariant test begins here -->
 
 1. What are our invariants/properties? <!-- Stateless and stateful fuzz testing -->
-2. 
+
+
+1. Some proper oracle use
+2. Write more tests
+3. Smart Contract Audit Preparation

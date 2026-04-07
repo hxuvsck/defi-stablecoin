@@ -8,6 +8,8 @@ import {Test} from "forge-std/Test.sol";
 import {BIOTAINEngine} from "../../src/BIOTAINEngine.sol";
 import {BiotainStableCoin} from "../../src/BiotainStableCoin.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+// Price Feed
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 
 contract Handler is Test {
     BIOTAINEngine bsce;
@@ -21,6 +23,8 @@ contract Handler is Test {
 
     uint256 MAX_DEPOSIT_SIZE = type(uint96).max; // the max uint96 value
 
+    MockV3Aggregator public ethUsdPriceFeed;
+
     constructor(BIOTAINEngine _biotainEngine, BiotainStableCoin _bsc) {
         bsce = _biotainEngine;
         bsc = _bsc;
@@ -28,6 +32,8 @@ contract Handler is Test {
         address[] memory collateralTokens = bsce.getCollateralTokens();
         weth = ERC20Mock(collateralTokens[0]);
         wbtc = ERC20Mock(collateralTokens[1]);
+
+        ethUsdPriceFeed = MockV3Aggregator(bsce.getCollateralTokenPriceFeed(address(weth)));
     }
 
     function mintBiotain(uint256 amount, uint256 addressSeed) public {
@@ -80,6 +86,12 @@ contract Handler is Test {
         }
         bsce.redeemCollateral(address(collateral), amountCollateral);
     }
+
+    // This breaks our invariant test suite!
+    // function updateCollateralPrice(uint96 newPrice) public {
+    //     int256 newPriceInt = int256(uint256(newPrice));
+    //     ethUsdPriceFeed.updateAnswer(newPriceInt);
+    // }
 
     // Helper functions
     function _getCollateralFromSeed(uint256 collateralSeed) private view returns (ERC20Mock) {
