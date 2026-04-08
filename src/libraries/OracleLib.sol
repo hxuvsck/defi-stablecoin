@@ -21,7 +21,7 @@ library OracleLib {
     // hardcoded heartbeats except Chainlink dynamic per heartbeat to pairs
     uint256 private constant TIMEOUT = 3 hours; // 10800 seconds
 
-    function stalePriceCheck(AggregatorV3Interface priceFeed)
+    function staleCheckLatestRoundData(AggregatorV3Interface priceFeed)
         public
         view
         returns (uint80, int256, uint256, uint256, uint80)

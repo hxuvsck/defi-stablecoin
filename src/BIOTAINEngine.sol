@@ -26,6 +26,7 @@ import {BiotainStableCoin} from "./BiotainStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {OracleLib} from "../src/libraries/OracleLib.sol";
 
 /**
  * @title BIOTAINEngine
@@ -58,6 +59,12 @@ contract BIOTAINEngine is ReentrancyGuard {
     error BIOTAINEngine__MintFailed();
     error BIOTAINEngine__HealthFactorOk();
     error BIOTAINEngine__HealthFactorNotImproved();
+
+    /////////////////////////
+    ///// Types  ////////////
+    /////////////////////////
+
+    using OracleLib for AggregatorV3Interface;
 
     //////////////////////////////
     ///// State Vars         /////
@@ -368,7 +375,7 @@ contract BIOTAINEngine is ReentrancyGuard {
         // $/ETH ETH ???
         // $2000 / ETH. $1000 = 0.5ETH
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
     }
 
